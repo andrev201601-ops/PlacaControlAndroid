@@ -1,0 +1,35 @@
+
+name: Construir APK
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+
+      - name: Extraer proyecto TAR
+        run: |
+          mkdir proyecto
+          tar -xf PlacaControlAndroid.tar -C proyecto
+          find proyecto -maxdepth 3 -type f | head -80
+
+      - name: Preparar Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Compilar APK
+        working-directory: proyecto
+        run: |
+          gradle --no-daemon assembleDebug
+
+      - name: Publicar APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: PlacaControl-APK
+          path: proyecto/**/build/outputs/apk/debug/*.apk
